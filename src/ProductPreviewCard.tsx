@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type ComponentType, type ReactNode } from "react";
 import { ShoppingBagIcon } from "./ShoppingBagIcon";
 import { cn } from "./cn";
 import { toNumber } from "./to-number";
@@ -9,18 +9,18 @@ import { PreviewPrice } from "./PreviewPrice";
 import { optionSummary, SIZE_PATTERN, COLOUR_PATTERN } from "./product-options";
 import { swatchColour } from "./colour";
 import type { CardSignal, MediaFit, PreviewProduct } from "./types";
-import type { ComponentType } from "react";
 
 /**
  * Ported from ordaro_retail/src/components/storefront/ProductCard.tsx.
  *
- * Deliberately NOT the full interactive card: no stretched link, no
- * wishlist heart, no quick-add bar/button, no hover-image swap. Those are
- * real storefront affordances a preview panel has no use for — this keeps
- * exactly the part that answers "what will a customer actually see": the
- * photo, the badges, the name, the price, and the one signal line beneath it.
- * The real `ProductCard` in ordaro_retail wraps THIS component with that
- * interactive chrome, rather than duplicating the rendering logic.
+ * Renders the photo, badges, name, price and signal line — everything that
+ * answers "what will a customer actually see" — with no opinion on
+ * navigation, wishlist, or add-to-cart, since a dashboard preview has no use
+ * for those. Real storefront interactivity (a stretched link, a wishlist
+ * heart, a quick-add button, a hover-image swap) is layered on top through
+ * `renderMediaOverlay`/`renderName`, which `ordaro_retail`'s own `ProductCard`
+ * supplies — so the composed, real card still renders through this one
+ * component, rather than duplicating its layout to add those affordances.
  */
 
 export interface ProductPreviewCardProps {
@@ -29,6 +29,13 @@ export interface ProductPreviewCardProps {
   mediaFit?: MediaFit;
   cardSignal?: CardSignal;
   ImageComponent?: ComponentType<PreviewImageProps>;
+  /** Rendered last inside the image frame (which is `position: relative`,
+   *  `overflow: hidden`) — a stretched link, wishlist button, quick-add bar,
+   *  or a second hover-swap image all belong here. Absent in a plain preview. */
+  renderMediaOverlay?: () => ReactNode;
+  /** Wraps the product name — e.g. a real `next/link` in the storefront.
+   *  Defaults to plain text. */
+  renderName?: (name: string) => ReactNode;
   className?: string;
 }
 
@@ -38,6 +45,8 @@ export function ProductPreviewCard({
   mediaFit = "smart",
   cardSignal = "stock",
   ImageComponent,
+  renderMediaOverlay,
+  renderName,
   className,
 }: ProductPreviewCardProps) {
   const displayVariants = useMemo(() => {
@@ -85,11 +94,13 @@ export function ProductPreviewCard({
           )}
           {isCombo && <span className="opp-badge opp-badge-combo">Combo</span>}
         </div>
+
+        {renderMediaOverlay?.()}
       </div>
 
       <div className="opp-card-info">
         {product.brand && <p className="opp-card-brand">{product.brand}</p>}
-        <p className="opp-card-name">{product.name}</p>
+        {renderName ? renderName(product.name) : <p className="opp-card-name">{product.name}</p>}
 
         <PreviewPrice
           price={price}
