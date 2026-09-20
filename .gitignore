@@ -1,4 +1,11 @@
 node_modules/
-dist/
 *.log
 .DS_Store
+*.tgz
+
+# dist/ is committed on purpose: this package is installed by consumers as a
+# git dependency (github:...#vX.Y.Z), and pnpm doesn't reliably run a git
+# dependency's build script (gated behind per-project "trusted dependency"
+# config, and flaky even then on recent pnpm versions). Shipping the built
+# output directly means a git install has nothing to build — just files to
+# use, the same guarantee a real npm registry publish would give.

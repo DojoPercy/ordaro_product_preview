@@ -1,0 +1,225 @@
+/*
+ * Plain, prefixed CSS — never Tailwind utility classes.
+ *
+ * ordaro_retail runs Tailwind v4 (arbitrary-property syntax like
+ * `bg-(--color-brand)`); ordaro_dashboard runs Tailwind v3. Shipping either
+ * app's utility classes here would silently break under the other's JIT
+ * compiler. Every class below is self-contained and every store-configurable
+ * value (card radius/ratio, brand colour) comes in as a CSS custom property
+ * on the root element, read here with a sane fallback — the same pattern
+ * ordaro_retail already uses for these exact values.
+ */
+
+.opp-card {
+  display: flex;
+  flex-direction: column;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.opp-card-media-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--opp-radius-card, 12px);
+}
+
+.opp-media-frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--opp-media-bg, #f4f1ea);
+  aspect-ratio: var(--opp-card-ratio, 1 / 1);
+  width: 100%;
+  height: 100%;
+}
+
+.opp-media-frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.opp-object-cover {
+  object-fit: cover;
+}
+
+.opp-object-contain {
+  object-fit: contain;
+}
+
+.opp-image-soldout {
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
+.opp-media-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #b8b2a4;
+}
+
+.opp-media-fallback svg {
+  width: 25%;
+  height: 25%;
+  min-width: 1rem;
+  min-height: 1rem;
+}
+
+.opp-badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.opp-badge {
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.opp-badge-soldout {
+  background: rgba(23, 23, 23, 0.85);
+  color: #fff;
+}
+
+.opp-badge-low-stock {
+  background: var(--opp-color-warning, #b45309);
+  color: #fff;
+}
+
+.opp-badge-combo {
+  background: rgba(255, 255, 255, 0.9);
+  color: #44403c;
+}
+
+.opp-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 0 2px;
+}
+
+.opp-card-brand {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8a8578;
+  margin: 0;
+}
+
+.opp-card-name {
+  font-size: 14px;
+  line-height: 1.35;
+  color: #1c1917;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.opp-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.opp-price-amount {
+  font-variant-numeric: tabular-nums;
+  color: #1c1917;
+}
+
+.opp-price-muted {
+  color: #8a8578;
+}
+
+.opp-price-sm {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.opp-price-md {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.opp-price-lg {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.opp-price-compare {
+  font-variant-numeric: tabular-nums;
+  color: #8a8578;
+  font-size: 12px;
+  text-decoration: line-through;
+}
+
+.opp-price-discount-chip {
+  border-radius: 6px;
+  background: var(--opp-color-success-soft, #dcfce7);
+  color: var(--opp-color-success, #15803d);
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.opp-combo-savings {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--opp-color-success, #15803d);
+  margin: 0;
+}
+
+.opp-signal-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.opp-swatch {
+  height: 14px;
+  width: 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.opp-signal-text {
+  font-size: 12px;
+  color: #8a8578;
+}
+
+.opp-signal-low-stock {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--opp-color-warning, #b45309);
+  margin: 0;
+}
+
+.opp-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
