@@ -1,6 +1,6 @@
 {
   "name": "@ordaro/product-preview",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shared, framework-version-agnostic product card rendering used by both the Ordaro storefront and the merchant dashboard's live preview, so the two can never visually drift apart.",
   "license": "UNLICENSED",
   "private": false,
