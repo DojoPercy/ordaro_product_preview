@@ -1,6 +1,6 @@
 {
   "name": "@ordaro/product-preview",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shared, framework-version-agnostic product card rendering used by both the Ordaro storefront and the merchant dashboard's live preview, so the two can never visually drift apart.",
   "license": "UNLICENSED",
   "private": false,
@@ -23,8 +23,8 @@
     "*.css"
   ],
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
+    "build": "node api.js && tsup",
+    "dev": "node api.js && tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
