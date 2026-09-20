@@ -26,13 +26,27 @@ export interface PreviewImageProps {
   className?: string;
   style?: CSSProperties;
   loading?: "lazy" | "eager";
+  /** Responsive-width hint. Ignored by the default plain-`<img>` renderer;
+   *  a `next/image`-based adapter (always rendered in `fill` mode, since this
+   *  frame is already the sized, positioned container) uses it directly. */
+  sizes?: string;
+  /** Above-the-fold hint — an injected `next/image` adapter maps this to its
+   *  own `priority` prop; the default renderer maps it to `loading="eager"`. */
+  priority?: boolean;
   onLoad?: (event: { currentTarget: HTMLImageElement }) => void;
 }
 
-function DefaultImage({ src, alt, className, style, loading = "lazy", onLoad }: PreviewImageProps) {
+function DefaultImage({ src, alt, className, style, priority, onLoad }: PreviewImageProps) {
   return (
     // eslint-disable-next-line jsx-a11y/alt-text -- alt is a required prop above
-    <img src={src} alt={alt} className={className} style={style} loading={loading} onLoad={onLoad} />
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      style={style}
+      loading={priority ? "eager" : "lazy"}
+      onLoad={onLoad}
+    />
   );
 }
 
@@ -44,6 +58,8 @@ export interface PreviewMediaProps {
   ratio?: string;
   /** `object-position` for cover crops — keeps the product centred. */
   focal?: string;
+  /** Forwarded to `ImageComponent` — see `PreviewImageProps.sizes`. */
+  sizes?: string;
   priority?: boolean;
   className?: string;
   imageClassName?: string;
@@ -57,6 +73,7 @@ export function PreviewMedia({
   fit = "smart",
   ratio,
   focal,
+  sizes,
   priority = false,
   className,
   imageClassName,
@@ -84,6 +101,8 @@ export function PreviewMedia({
         <ImageComponent
           src={src}
           alt={alt}
+          sizes={sizes}
+          priority={priority}
           loading={priority ? "eager" : "lazy"}
           className={cn(objectFit, imageClassName)}
           style={focal && objectFit === "opp-object-cover" ? { objectPosition: focal } : undefined}

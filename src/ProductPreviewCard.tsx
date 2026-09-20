@@ -28,6 +28,9 @@ export interface ProductPreviewCardProps {
   formatPrice: (value: string | number) => string;
   mediaFit?: MediaFit;
   cardSignal?: CardSignal;
+  /** Forwarded to the image frame — see `PreviewImageProps`. */
+  sizes?: string;
+  priority?: boolean;
   ImageComponent?: ComponentType<PreviewImageProps>;
   /** Rendered last inside the image frame (which is `position: relative`,
    *  `overflow: hidden`) — a stretched link, wishlist button, quick-add bar,
@@ -44,6 +47,8 @@ export function ProductPreviewCard({
   formatPrice,
   mediaFit = "smart",
   cardSignal = "stock",
+  sizes,
+  priority,
   ImageComponent,
   renderMediaOverlay,
   renderName,
@@ -77,6 +82,8 @@ export function ProductPreviewCard({
           src={imageUrl}
           alt={product.name}
           fit={mediaFit}
+          sizes={sizes}
+          priority={priority}
           className="opp-card-media"
           imageClassName={allSoldOut ? "opp-image-soldout" : undefined}
           ImageComponent={ImageComponent}
