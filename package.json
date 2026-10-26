@@ -23,8 +23,8 @@
     "*.css"
   ],
   "scripts": {
-    "build": "node api.js && tsup",
-    "dev": "node api.js && tsup --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
