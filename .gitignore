@@ -9,4 +9,3 @@ node_modules/
 # config, and flaky even then on recent pnpm versions). Shipping the built
 # output directly means a git install has nothing to build — just files to
 # use, the same guarantee a real npm registry publish would give.
-config.bat

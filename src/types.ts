@@ -43,10 +43,11 @@ export interface PreviewProduct {
   basePrice: string | number;
   compareAtPrice: string | number | null;
   images: string[];
+  attributes?: Record<string, unknown> | null;
   options?: PreviewOption[];
   variants: PreviewVariant[];
 }
 
 export type MediaFit = "cover" | "contain" | "smart";
 /** Matches ordaro_retail's StorePreset['cardSignal'] exactly. */
-export type CardSignal = "colour" | "size" | "stock";
+export type CardSignal = "colour" | "size" | "stock" | "fashion";
