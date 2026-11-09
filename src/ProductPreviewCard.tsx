@@ -130,6 +130,29 @@ export function ProductPreviewCard({
   );
 }
 
+function formatFitBadge(attributes?: Record<string, unknown> | null): string | null {
+  if (!attributes || typeof attributes !== "object") return null;
+  const parts: string[] = [];
+  const fit = attributes["fit"];
+  if (fit === "runs_small") parts.push("Runs Small");
+  else if (fit === "true_to_size") parts.push("True to Size");
+  else if (fit === "relaxed") parts.push("Relaxed Fit");
+
+  const stretch = attributes["stretch"];
+  if (stretch === "high") parts.push("Stretchy");
+  else if (stretch === "slight") parts.push("Slight Stretch");
+  else if (stretch === "none") parts.push("Non-Stretch");
+
+  const setType = attributes["setType"];
+  if (setType === "two_piece") parts.push("2-Piece Set");
+  else if (setType === "three_piece") parts.push("3-Piece Set");
+
+  const preOrderDays = Number(attributes["preOrderDays"] ?? 0);
+  if (preOrderDays > 0) parts.push(`Ships in ${preOrderDays}d`);
+
+  return parts.length > 0 ? parts.slice(0, 2).join(" · ") : null;
+}
+
 function CardSignals({
   product,
   soldOut,
@@ -141,42 +164,77 @@ function CardSignals({
 }) {
   if (soldOut) return null;
 
-  if (cardSignal === "colour") {
-    const colours = optionSummary(product, COLOUR_PATTERN).filter((c) => c.available);
-    if (colours.length < 2) return null;
-    return (
-      <div className="opp-signal-row">
-        {colours.slice(0, 5).map(({ value }) => {
-          const colour = swatchColour(value);
-          return colour ? (
-            <span key={value} title={value} className="opp-swatch" style={{ background: colour }} />
-          ) : (
-            <span key={value} className="opp-signal-text">
-              {value}
-            </span>
-          );
-        })}
-        {colours.length > 5 && <span className="opp-signal-text">+{colours.length - 5}</span>}
-        <span className="opp-sr-only">
-          {colours.length} colours available: {colours.map((c) => c.value).join(", ")}
-        </span>
-      </div>
-    );
-  }
+  const sizes = optionSummary(product, SIZE_PATTERN);
+  const colours = optionSummary(product, COLOUR_PATTERN).filter((c) => c.available);
+  const fitBadge = formatFitBadge(product.attributes);
 
-  if (cardSignal === "size") {
-    const sizes = optionSummary(product, SIZE_PATTERN);
-    const inStock = sizes.filter((s) => s.available);
-    if (sizes.length < 2) return null;
+  // Fashion mode or boutique preset ('colour' / 'size' / 'fashion'):
+  // Render both available size pills (with sold-out sizes struck through) and colour swatches!
+  if (cardSignal === "colour" || cardSignal === "size" || cardSignal === "fashion") {
+    const hasSizes = sizes.length >= 1;
+    const hasColours = colours.length >= 1;
+
+    if (!hasSizes && !hasColours && !fitBadge) {
+      const remaining = product.variants.reduce(
+        (total, v) => total + (v.isSoldOut ? 0 : v.availableStock),
+        0,
+      );
+      if (remaining > 0 && remaining <= 5) {
+        return <p className="opp-signal-low-stock">Only {remaining} left</p>;
+      }
+      return null;
+    }
+
     return (
-      <p className="opp-signal-text">
-        {inStock.length === 0
-          ? "No sizes left"
-          : `Sizes ${inStock
-              .slice(0, 4)
-              .map((s) => s.value)
-              .join(", ")}${inStock.length > 4 ? ` +${inStock.length - 4}` : ""}`}
-      </p>
+      <div className="opp-fashion-signals">
+        {hasSizes && (
+          <div className="opp-size-pills" aria-label="Available sizes">
+            {sizes.slice(0, 6).map(({ value, available }) => (
+              <span
+                key={value}
+                className={cn(
+                  "opp-size-pill",
+                  !available && "opp-size-pill-soldout",
+                )}
+                title={available ? `Size ${value} available` : `Size ${value} sold out`}
+              >
+                {value}
+              </span>
+            ))}
+            {sizes.length > 6 && (
+              <span className="opp-signal-text">+{sizes.length - 6}</span>
+            )}
+          </div>
+        )}
+
+        {hasColours && (
+          <div className="opp-signal-row">
+            {colours.slice(0, 5).map(({ value }) => {
+              const colour = swatchColour(value);
+              return colour ? (
+                <span
+                  key={value}
+                  title={value}
+                  className="opp-swatch"
+                  style={{ background: colour }}
+                />
+              ) : (
+                <span key={value} className="opp-signal-text">
+                  {value}
+                </span>
+              );
+            })}
+            {colours.length > 5 && (
+              <span className="opp-signal-text">+{colours.length - 5}</span>
+            )}
+            <span className="opp-sr-only">
+              {colours.length} colours available: {colours.map((c) => c.value).join(", ")}
+            </span>
+          </div>
+        )}
+
+        {fitBadge && <p className="opp-fit-badge">{fitBadge}</p>}
+      </div>
     );
   }
 
