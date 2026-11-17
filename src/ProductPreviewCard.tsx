@@ -96,9 +96,15 @@ export function ProductPreviewCard({
 
         <div className="opp-badges">
           {allSoldOut && <span className="opp-badge opp-badge-soldout">Sold out</span>}
-          {!allSoldOut && firstVariant && firstVariant.availableStock <= 3 && (
-            <span className="opp-badge opp-badge-low-stock">Only {firstVariant.availableStock} left</span>
-          )}
+          {!allSoldOut &&
+            firstVariant &&
+            !firstVariant.isSoldOut &&
+            Number(firstVariant.availableStock) > 0 &&
+            Number(firstVariant.availableStock) <= 3 && (
+              <span className="opp-badge opp-badge-low-stock">
+                Only {firstVariant.availableStock} left
+              </span>
+            )}
           {isCombo && <span className="opp-badge opp-badge-combo">Combo</span>}
         </div>
 
@@ -175,12 +181,15 @@ function CardSignals({
     const hasColours = colours.length >= 1;
 
     if (!hasSizes && !hasColours && !fitBadge) {
-      const remaining = product.variants.reduce(
-        (total, v) => total + (v.isSoldOut ? 0 : v.availableStock),
-        0,
-      );
-      if (remaining > 0 && remaining <= 5) {
-        return <p className="opp-signal-low-stock">Only {remaining} left</p>;
+      const hasUntracked = product.variants.some((v) => !v.isSoldOut && !(Number(v.availableStock) > 0));
+      if (!hasUntracked) {
+        const remaining = product.variants.reduce(
+          (total, v) => total + (v.isSoldOut ? 0 : v.availableStock),
+          0,
+        );
+        if (remaining > 0 && remaining <= 5) {
+          return <p className="opp-signal-low-stock">Only {remaining} left</p>;
+        }
       }
       return null;
     }
@@ -238,12 +247,15 @@ function CardSignals({
     );
   }
 
-  const remaining = product.variants.reduce(
-    (total, v) => total + (v.isSoldOut ? 0 : v.availableStock),
-    0,
-  );
-  if (remaining > 0 && remaining <= 5) {
-    return <p className="opp-signal-low-stock">Only {remaining} left</p>;
+  const hasUntracked = product.variants.some((v) => !v.isSoldOut && !(Number(v.availableStock) > 0));
+  if (!hasUntracked) {
+    const remaining = product.variants.reduce(
+      (total, v) => total + (v.isSoldOut ? 0 : v.availableStock),
+      0,
+    );
+    if (remaining > 0 && remaining <= 5) {
+      return <p className="opp-signal-low-stock">Only {remaining} left</p>;
+    }
   }
   return null;
 }

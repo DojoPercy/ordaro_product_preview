@@ -44,12 +44,13 @@ interface PreviewProduct {
     basePrice: string | number;
     compareAtPrice: string | number | null;
     images: string[];
+    attributes?: Record<string, unknown> | null;
     options?: PreviewOption[];
     variants: PreviewVariant[];
 }
 type MediaFit = "cover" | "contain" | "smart";
 /** Matches ordaro_retail's StorePreset['cardSignal'] exactly. */
-type CardSignal = "colour" | "size" | "stock";
+type CardSignal = "colour" | "size" | "stock" | "fashion";
 
 interface PreviewImageProps {
     src: string;

@@ -253,7 +253,7 @@ function ProductPreviewCard({
       ),
       /* @__PURE__ */ jsxs3("div", { className: "opp-badges", children: [
         allSoldOut && /* @__PURE__ */ jsx4("span", { className: "opp-badge opp-badge-soldout", children: "Sold out" }),
-        !allSoldOut && firstVariant && firstVariant.availableStock <= 3 && /* @__PURE__ */ jsxs3("span", { className: "opp-badge opp-badge-low-stock", children: [
+        !allSoldOut && firstVariant && !firstVariant.isSoldOut && Number(firstVariant.availableStock) > 0 && Number(firstVariant.availableStock) <= 3 && /* @__PURE__ */ jsxs3("span", { className: "opp-badge opp-badge-low-stock", children: [
           "Only ",
           firstVariant.availableStock,
           " left"
@@ -285,47 +285,111 @@ function ProductPreviewCard({
     ] })
   ] });
 }
+function formatFitBadge(attributes) {
+  if (!attributes || typeof attributes !== "object") return null;
+  const parts = [];
+  const fit = attributes["fit"];
+  if (fit === "runs_small") parts.push("Runs Small");
+  else if (fit === "true_to_size") parts.push("True to Size");
+  else if (fit === "relaxed") parts.push("Relaxed Fit");
+  const stretch = attributes["stretch"];
+  if (stretch === "high") parts.push("Stretchy");
+  else if (stretch === "slight") parts.push("Slight Stretch");
+  else if (stretch === "none") parts.push("Non-Stretch");
+  const setType = attributes["setType"];
+  if (setType === "two_piece") parts.push("2-Piece Set");
+  else if (setType === "three_piece") parts.push("3-Piece Set");
+  const preOrderDays = Number(attributes["preOrderDays"] ?? 0);
+  if (preOrderDays > 0) parts.push(`Ships in ${preOrderDays}d`);
+  return parts.length > 0 ? parts.slice(0, 2).join(" \xB7 ") : null;
+}
 function CardSignals({
   product,
   soldOut,
   cardSignal
 }) {
   if (soldOut) return null;
-  if (cardSignal === "colour") {
-    const colours = optionSummary(product, COLOUR_PATTERN).filter((c) => c.available);
-    if (colours.length < 2) return null;
-    return /* @__PURE__ */ jsxs3("div", { className: "opp-signal-row", children: [
-      colours.slice(0, 5).map(({ value }) => {
-        const colour = swatchColour(value);
-        return colour ? /* @__PURE__ */ jsx4("span", { title: value, className: "opp-swatch", style: { background: colour } }, value) : /* @__PURE__ */ jsx4("span", { className: "opp-signal-text", children: value }, value);
-      }),
-      colours.length > 5 && /* @__PURE__ */ jsxs3("span", { className: "opp-signal-text", children: [
-        "+",
-        colours.length - 5
+  const sizes = optionSummary(product, SIZE_PATTERN);
+  const colours = optionSummary(product, COLOUR_PATTERN).filter((c) => c.available);
+  const fitBadge = formatFitBadge(product.attributes);
+  if (cardSignal === "colour" || cardSignal === "size" || cardSignal === "fashion") {
+    const hasSizes = sizes.length >= 1;
+    const hasColours = colours.length >= 1;
+    if (!hasSizes && !hasColours && !fitBadge) {
+      const hasUntracked2 = product.variants.some((v) => !v.isSoldOut && !(Number(v.availableStock) > 0));
+      if (!hasUntracked2) {
+        const remaining = product.variants.reduce(
+          (total, v) => total + (v.isSoldOut ? 0 : v.availableStock),
+          0
+        );
+        if (remaining > 0 && remaining <= 5) {
+          return /* @__PURE__ */ jsxs3("p", { className: "opp-signal-low-stock", children: [
+            "Only ",
+            remaining,
+            " left"
+          ] });
+        }
+      }
+      return null;
+    }
+    return /* @__PURE__ */ jsxs3("div", { className: "opp-fashion-signals", children: [
+      hasSizes && /* @__PURE__ */ jsxs3("div", { className: "opp-size-pills", "aria-label": "Available sizes", children: [
+        sizes.slice(0, 6).map(({ value, available }) => /* @__PURE__ */ jsx4(
+          "span",
+          {
+            className: cn(
+              "opp-size-pill",
+              !available && "opp-size-pill-soldout"
+            ),
+            title: available ? `Size ${value} available` : `Size ${value} sold out`,
+            children: value
+          },
+          value
+        )),
+        sizes.length > 6 && /* @__PURE__ */ jsxs3("span", { className: "opp-signal-text", children: [
+          "+",
+          sizes.length - 6
+        ] })
       ] }),
-      /* @__PURE__ */ jsxs3("span", { className: "opp-sr-only", children: [
-        colours.length,
-        " colours available: ",
-        colours.map((c) => c.value).join(", ")
-      ] })
+      hasColours && /* @__PURE__ */ jsxs3("div", { className: "opp-signal-row", children: [
+        colours.slice(0, 5).map(({ value }) => {
+          const colour = swatchColour(value);
+          return colour ? /* @__PURE__ */ jsx4(
+            "span",
+            {
+              title: value,
+              className: "opp-swatch",
+              style: { background: colour }
+            },
+            value
+          ) : /* @__PURE__ */ jsx4("span", { className: "opp-signal-text", children: value }, value);
+        }),
+        colours.length > 5 && /* @__PURE__ */ jsxs3("span", { className: "opp-signal-text", children: [
+          "+",
+          colours.length - 5
+        ] }),
+        /* @__PURE__ */ jsxs3("span", { className: "opp-sr-only", children: [
+          colours.length,
+          " colours available: ",
+          colours.map((c) => c.value).join(", ")
+        ] })
+      ] }),
+      fitBadge && /* @__PURE__ */ jsx4("p", { className: "opp-fit-badge", children: fitBadge })
     ] });
   }
-  if (cardSignal === "size") {
-    const sizes = optionSummary(product, SIZE_PATTERN);
-    const inStock = sizes.filter((s) => s.available);
-    if (sizes.length < 2) return null;
-    return /* @__PURE__ */ jsx4("p", { className: "opp-signal-text", children: inStock.length === 0 ? "No sizes left" : `Sizes ${inStock.slice(0, 4).map((s) => s.value).join(", ")}${inStock.length > 4 ? ` +${inStock.length - 4}` : ""}` });
-  }
-  const remaining = product.variants.reduce(
-    (total, v) => total + (v.isSoldOut ? 0 : v.availableStock),
-    0
-  );
-  if (remaining > 0 && remaining <= 5) {
-    return /* @__PURE__ */ jsxs3("p", { className: "opp-signal-low-stock", children: [
-      "Only ",
-      remaining,
-      " left"
-    ] });
+  const hasUntracked = product.variants.some((v) => !v.isSoldOut && !(Number(v.availableStock) > 0));
+  if (!hasUntracked) {
+    const remaining = product.variants.reduce(
+      (total, v) => total + (v.isSoldOut ? 0 : v.availableStock),
+      0
+    );
+    if (remaining > 0 && remaining <= 5) {
+      return /* @__PURE__ */ jsxs3("p", { className: "opp-signal-low-stock", children: [
+        "Only ",
+        remaining,
+        " left"
+      ] });
+    }
   }
   return null;
 }
