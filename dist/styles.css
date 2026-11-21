@@ -41,10 +41,12 @@
 
 .opp-object-cover {
   object-fit: cover;
+  object-position: var(--opp-object-position, 50% 22%);
 }
 
 .opp-object-contain {
   object-fit: contain;
+  padding: var(--opp-contain-pad, 4%);
 }
 
 .opp-image-soldout {
@@ -70,13 +72,13 @@
 
 .opp-badges {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 8px;
+  left: 8px;
   z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 4px;
   pointer-events: none;
 }
 
@@ -86,6 +88,7 @@
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
+  backdrop-filter: blur(6px);
 }
 
 .opp-badge-soldout {

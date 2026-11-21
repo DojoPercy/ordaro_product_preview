@@ -39,7 +39,7 @@ function toNumber(value) {
 // src/PreviewMedia.tsx
 import { useState } from "react";
 import { jsx as jsx2 } from "react/jsx-runtime";
-var SMART_TOLERANCE = 0.15;
+var SMART_TOLERANCE = 0.45;
 function DefaultImage({ src, alt, className, style, priority, onLoad }) {
   return (
     // eslint-disable-next-line jsx-a11y/alt-text -- alt is a required prop above
@@ -69,8 +69,9 @@ function PreviewMedia({
   fallback,
   ImageComponent = DefaultImage
 }) {
-  const [smartFit, setSmartFit] = useState("cover");
+  const [containSrc, setContainSrc] = useState(null);
   const isSmart = fit === "smart";
+  const smartFit = src && containSrc === src ? "contain" : "cover";
   const objectFit = fit === "cover" ? "opp-object-cover" : fit === "contain" ? "opp-object-contain" : smartFit === "contain" ? "opp-object-contain" : "opp-object-cover";
   return /* @__PURE__ */ jsx2(
     "div",
@@ -86,8 +87,8 @@ function PreviewMedia({
           priority,
           loading: priority ? "eager" : "lazy",
           className: cn(objectFit, imageClassName),
-          style: focal && objectFit === "opp-object-cover" ? { objectPosition: focal } : void 0,
-          onLoad: isSmart ? (event) => {
+          style: objectFit === "opp-object-cover" ? { objectPosition: focal ?? "50% 22%" } : void 0,
+          onLoad: isSmart && src ? (event) => {
             const img = event.currentTarget;
             const frame = img.parentElement;
             if (!frame || !img.naturalWidth || !img.naturalHeight) return;
@@ -95,7 +96,7 @@ function PreviewMedia({
             const imageRatio = img.naturalWidth / img.naturalHeight;
             if (!frameRatio || !imageRatio) return;
             const drift = Math.abs(imageRatio - frameRatio) / frameRatio;
-            setSmartFit(drift > SMART_TOLERANCE ? "contain" : "cover");
+            setContainSrc(drift > SMART_TOLERANCE ? src : null);
           } : void 0
         }
       ) : fallback ?? /* @__PURE__ */ jsx2("span", { className: "opp-media-fallback", children: /* @__PURE__ */ jsx2(ShoppingBagIcon, {}) })

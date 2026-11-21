@@ -18,7 +18,7 @@ import type { MediaFit } from "./types";
  *    — this package can't depend on either app's context providers.
  */
 
-const SMART_TOLERANCE = 0.15;
+const SMART_TOLERANCE = 0.45;
 
 export interface PreviewImageProps {
   src: string;
@@ -80,9 +80,10 @@ export function PreviewMedia({
   fallback,
   ImageComponent = DefaultImage,
 }: PreviewMediaProps) {
-  const [smartFit, setSmartFit] = useState<"cover" | "contain">("cover");
+  const [containSrc, setContainSrc] = useState<string | null>(null);
 
   const isSmart = fit === "smart";
+  const smartFit: "cover" | "contain" = src && containSrc === src ? "contain" : "cover";
   const objectFit =
     fit === "cover"
       ? "opp-object-cover"
@@ -105,9 +106,13 @@ export function PreviewMedia({
           priority={priority}
           loading={priority ? "eager" : "lazy"}
           className={cn(objectFit, imageClassName)}
-          style={focal && objectFit === "opp-object-cover" ? { objectPosition: focal } : undefined}
+          style={
+            objectFit === "opp-object-cover"
+              ? { objectPosition: focal ?? "50% 22%" }
+              : undefined
+          }
           onLoad={
-            isSmart
+            isSmart && src
               ? (event) => {
                   const img = event.currentTarget;
                   const frame = img.parentElement;
@@ -116,7 +121,7 @@ export function PreviewMedia({
                   const imageRatio = img.naturalWidth / img.naturalHeight;
                   if (!frameRatio || !imageRatio) return;
                   const drift = Math.abs(imageRatio - frameRatio) / frameRatio;
-                  setSmartFit(drift > SMART_TOLERANCE ? "contain" : "cover");
+                  setContainSrc(drift > SMART_TOLERANCE ? src : null);
                 }
               : undefined
           }
